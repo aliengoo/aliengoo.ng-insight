@@ -1,0 +1,51 @@
+.ng-model-insight {
+  font-size: 12px; }
+  .ng-model-insight .indicator.dirty {
+    display: inline-block;
+    border: 1px solid #73481c;
+    margin-top: 2px;
+    padding: 2px;
+    background-color: #73481c;
+    color: white; }
+  .ng-model-insight .indicator.pristine {
+    display: inline-block;
+    border: 1px solid #249bd5;
+    margin-top: 2px;
+    padding: 2px;
+    background-color: #249bd5;
+    color: white; }
+  .ng-model-insight .indicator.valid {
+    display: inline-block;
+    border: 1px solid #408037;
+    margin-top: 2px;
+    padding: 2px;
+    background-color: #408037;
+    color: white; }
+  .ng-model-insight .indicator.invalid {
+    display: inline-block;
+    border: 1px solid #ff0e1d;
+    margin-top: 2px;
+    padding: 2px;
+    background-color: #ff0e1d;
+    color: white; }
+  .ng-model-insight .indicator.error {
+    display: inline-block;
+    border: 1px solid #ff0e1d;
+    margin-top: 2px;
+    padding: 2px;
+    background-color: #ff0e1d;
+    color: white; }
+  .ng-model-insight .indicator.view-value {
+    display: inline-block;
+    border: 1px solid #c767d1;
+    margin-top: 2px;
+    padding: 2px;
+    background-color: #c767d1;
+    color: white; }
+  .ng-model-insight .indicator.model-value {
+    display: inline-block;
+    border: 1px solid #6d896a;
+    margin-top: 2px;
+    padding: 2px;
+    background-color: #6d896a;
+    color: white; }

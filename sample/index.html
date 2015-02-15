@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html ng-app="aliengoo.sample">
+<head lang="en">
+  <meta charset="UTF-8">
+  <title>ng-insight sample</title>
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="../dist/css/aliengoo.ng-insight.css"/>
+</head>
+<body ng-controller="App as vm">
+
+<div class="container">
+  <header class="page-header">
+    <h1>aliengoo.ng-insight sample</h1>
+  </header>
+
+  <form novalidate name="appForm" ng-model-insight="true">
+    <div class="col-md-6">
+
+      <div class="form-group">
+        <label for="firstName">First name</label>
+        <input type="text" ng-model="vm.person.firstName" class="form-control" required id="firstName" name="firstName"
+               minlength="5" maxlength="50"/>
+      </div>
+
+      <div class="form-group">
+        <label for="lastName">Last name</label>
+        <input type="text" ng-model="vm.person.lastName" class="form-control" required id="lastName" name="firstName"/>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="form-group">
+        <label for="favouriteMovie">Favourite movie</label>
+        <input type="text" ng-model="vm.person.favouriteMovie" class="form-control" required id="favouriteMovie" name="firstName"
+               minlength="5" maxlength="50"/>
+      </div>
+
+      <div class="form-group">
+        <label for="lastName">Birth date</label>
+        <input type="date" ng-model="vm.person.birthDate" class="form-control" required id="birthDate" name="birthDate" min="1900-01-01" max="2015-01-01"/>
+      </div>
+
+
+    </div>
+  </form>
+</div>
+<script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.13/angular.min.js"></script>
+<script src="../dist/js/aliengoo.ng-insight.js"></script>
+<script>
+  angular.module('aliengoo.sample', ['aliengoo.ng-insight']).controller('App', App);
+
+  function App() {
+    var vm = this;
+
+    vm.person = {
+      firstName: '',
+      lastName: ''
+    };
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+$dirtyColor : #73481c;
+$dirtyTextColor : white;
+
+$pristineColor : #249bd5;
+$pristineTextColor : white;
+
+$validColor : #408037;
+$validTextColor : white;
+
+$invalidColor : #ff0e1d;
+$invalidTextColor : white;
+
+$viewValueColor : #c767d1;
+$viewValueTextColor : white;
+
+$modelValueColor : #6d896a;
+$modelValueTextColor : white;
+
+@mixin indicator($indicatorType, $backgroundColor, $textColor){
+
+  .indicator {
+    &.#{$indicatorType} {
+      display : inline-block;
+      border: 1px solid $backgroundColor;
+      margin-top: 2px;
+      padding: 2px;
+      background-color: $backgroundColor;
+      color : $textColor;
+    }
+  }
+}
+
+.ng-model-insight {
+  font-size : 12px;
+  @include indicator('dirty', $dirtyColor, $dirtyTextColor);
+  @include indicator('pristine', $pristineColor, $pristineTextColor);
+  @include indicator('valid', $validColor, $validTextColor);
+  @include indicator('invalid', $invalidColor, $invalidTextColor);
+  @include indicator('error', $invalidColor, $invalidTextColor);
+  @include indicator('view-value', $viewValueColor, $viewValueTextColor);
+  @include indicator('model-value', $modelValueColor, $modelValueTextColor);
+}
