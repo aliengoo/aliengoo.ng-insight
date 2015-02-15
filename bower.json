@@ -2,10 +2,13 @@
   "name": "aliengoo.ng-insight",
   "version": "0.0.1",
   "authors": [
-    "aliengoo <glenn.android+github@gmail.com>"
+    "aliengoo"
   ],
   "description": "Provide visual insight into the state each input in a form",
-  "main": "aliengoo.ng-insight.js",
+  "main": [
+    "./dist/js/aliengoo.ng-insight.js",
+    "./dist/css/aliengoo.ng-insight.css"
+  ],
   "keywords": [
     "ngmodel",
     "ng-model"
