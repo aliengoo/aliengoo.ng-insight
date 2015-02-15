@@ -11,6 +11,8 @@ Visualise the current state of each ```ng-model``` bound element.
 Add a reference in your Angular module.
 
 	angular.module('myApp', ['aliengoo.ng-insight']);
+
+Add ```aliengoo.ng-insight.js``` and ```aliengoo.ng-insight.css``` to your preferred build solution.
 	
 Finally, add an attribute to the ```<form>``` element.
 	
