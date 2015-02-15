@@ -76,7 +76,7 @@
 
         $compile(modelStateElement)(childScope);
 
-        ngElement.parent().append(modelStateElement);
+        ngElement.after(modelStateElement);
 
         var build = function () {
           var errorsHtml = "";
