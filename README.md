@@ -2,7 +2,7 @@
 
 Visualise the current state of each ```ng-model``` bound element.
 
-!image!
+![](https://raw.githubusercontent.com/aliengoo/aliengoo.ng-insight/master/images/aliengoo-ng-insight-sample.gif)
 
 ## Getting started
 
@@ -15,3 +15,5 @@ Add a reference in your Angular module.
 Finally, add an attribute to the ```<form>``` element.
 	
 	<form name='myForm' novalidate ng-model-insight='true'>inputs are here...</form>
+	
+![](https://raw.githubusercontent.com/aliengoo/aliengoo.ng-insight/master/images/aliengoo-ng-insight-sample.png)	
