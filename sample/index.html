@@ -13,7 +13,7 @@
     <h1>aliengoo.ng-insight sample</h1>
   </header>
 
-  <form novalidate name="appForm" ng-model-insight="true">
+  <form novalidate name="appForm" ng-model-insight="true" ng-scope-insight>
     <div class="col-md-6">
 
       <div class="form-group">
@@ -24,18 +24,18 @@
 
       <div class="form-group">
         <label for="lastName">Last name</label>
-        <input type="text" ng-model="vm.person.lastName" class="form-control" required id="lastName" name="firstName"/>
+        <input type="text" ng-model="vm.person.lastName" class="form-control" required id="lastName" name="lastName"/>
       </div>
     </div>
     <div class="col-md-6">
       <div class="form-group">
         <label for="favouriteMovie">Favourite movie</label>
-        <input type="text" ng-model="vm.person.favouriteMovie" class="form-control" required id="favouriteMovie" name="firstName"
+        <input type="text" ng-model="vm.person.favouriteMovie" class="form-control" required id="favouriteMovie" name="favouriteMovie"
                minlength="5" maxlength="50"/>
       </div>
 
       <div class="form-group">
-        <label for="lastName">Birth date</label>
+        <label for="birthDate">Birth date</label>
         <input type="date" ng-model="vm.person.birthDate" class="form-control" required id="birthDate" name="birthDate" min="1900-01-01" max="2015-01-01"/>
       </div>
 
