@@ -20,7 +20,7 @@
       }
 
       var formElement = $(element);
-      attribute.$observe('ngModelInsight', (enabled) => {
+      attribute.$observe('ngModelInsight', function (enabled) {
         scope.$evalAsync(() => {
 
           var ngModelElements = formElement.find('[ng-model]').toArray();
@@ -47,12 +47,12 @@
     }
 
     function observeModel(scope, ngElement) {
-      let ngModel = ngElement.controller('ngModel');
-      let props = "dirty,pristine,error,valid,invalid,viewValue,modelValue".split(',');
-      let childScope;
-      let name = 'ngModelInsight_' + ngElement.attr('ng-model').replace('.', '_');
-      let selector = `[name="${name}"]`;
-      let modelStateElement = $('body').find(selector);
+      var ngModel = ngElement.controller('ngModel');
+      var props = "dirty,pristine,error,valid,invalid,viewValue,modelValue".split(',');
+      var childScope;
+      var name = 'ngModelInsight_' + ngElement.attr('ng-model').replace('.', '_');
+      var selector = `[name="${name}"]`;
+      var modelStateElement = $('body').find(selector);
 
       if (modelStateElement) {
         let oldScope = angular.element(modelStateElement).scope();
@@ -82,14 +82,15 @@
 
         let build = () => {
           var errorsHtml = '';
-          for (let e of Object.keys(childScope.error || {})) {
+          angular.forEach(Object.keys(childScope.error || {}), function (e) {
             errorsHtml += `<samp class='indicator error'><em>${e}</em></samp>`;
-          }
+          });
 
           $(modelStateElement).find('[name="errors"]').html(errorsHtml);
-          for (let prop of props) {
+
+          angular.forEach(props, function (prop) {
             childScope[prop] = ngModel[`$${prop}`];
-          }
+          });
         };
 
         childScope.$watch(() => ngModel.$viewValue, build);

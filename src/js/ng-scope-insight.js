@@ -11,37 +11,53 @@
 
     return exports;
 
-    function link(scope, element, attributes) {
+    function link(scope, element) {
 
       if (angular.isUndefined($)) {
         console.error('aliengoo.ng-insight requires jQuery!');
         return;
       }
 
-      var interestElements = 'input,textarea,select'.split(',');
+      var body = $('body');
 
-      var treeWalker = document.createTreeWalker(document, NodeFilter.SHOW_ALL, {
-        acceptNode: function (node) {
-          return NodeFilter.FILTER_ACCEPT;
+      function processElement(element) {
+        let ngElement = angular.element(element);
+        var scope = ngElement.scope();
+
+        if (scope) {
+          let name = ngElement.attr('name');
+          $(`span.ng-scope-insight[name="${name}"]`).remove();
+          let id = scope.$id;
+          let offset = ngElement.offset();
+          let left = offset.left;
+          let top = offset.top - $(document).scrollTop();
+
+          var html = `<span class="ng-scope-insight" name='${name}' style='position:absolute;left:${left}px;top:${top}px'>${id}</span>`;
+
+          body.append(angular.element(html));
         }
-      }, false);
+      }
 
-      do {
-        var localName = treeWalker.currentNode.localName;
+      var observer = new MutationObserver(function (mutationRecords) {
+        angular.forEach(mutationRecords, (mutationRecord) => {
+          processElement(mutationRecord.target);
+        });
+      });
 
-        if (interestElements.indexOf(localName) >= 0) {
+      var config = {attributes: true, childList: true, characterData: true};
 
-          var el = angular.element(treeWalker.currentNode);
 
-          var scope = el.scope();
+      scope.$evalAsync(() => {
+        let ngModelElements = $(element).find('[ng-model]');
 
-          if (scope) {
-            let id = scope.$id;
-            el.attr('data-scope', id);
-            el.addClass('ng-scope-insight');
-          }
-        }
-      } while (treeWalker.nextNode());
+        $(window).resize(function(){
+          angular.forEach(ngModelElements, processElement);
+        });
+
+        angular.forEach(ngModelElements, (ngModelElement) => {
+          observer.observe(ngModelElement, config);
+        });
+      });
     }
   }
 }());

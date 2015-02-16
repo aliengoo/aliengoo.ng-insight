@@ -50,11 +50,10 @@
     background-color: #6d896a;
     color: white; }
 
-.ng-scope-insight::after {
+.ng-scope-insight {
   font-size: 10px;
   display: inline-block;
   border: 1px solid;
   padding: 2px;
   color: white;
-  background-color: #4649df;
-  content: attr(data-scope); }
+  background-color: #4649df; }
