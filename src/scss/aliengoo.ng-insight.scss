@@ -40,3 +40,12 @@ $modelValueTextColor : white;
   @include indicator('view-value', $viewValueColor, $viewValueTextColor);
   @include indicator('model-value', $modelValueColor, $modelValueTextColor);
 }
+
+.ng-scope-insight{
+    font-size: 10px;
+    display: inline-block;
+    border: 1px solid;
+    padding: 2px;
+    color: white;
+    background-color: #4649df;
+}

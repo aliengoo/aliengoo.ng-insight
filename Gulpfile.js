@@ -30,11 +30,17 @@
       .pipe(gulpLivereload());
   });
 
+  gulp.task('livereload', function () {
+    return gulp.src('./sample/index.html')
+      .pipe(gulpLivereload());
+  });
+
 
   gulp.task('default', ['compile-js', 'compile-scss'], function () {
     gulpLivereload.listen();
 
     gulp.watch(['./src/js/*.js'], ['compile-js']);
     gulp.watch(['./src/scss/*.scss'], ['compile-scss']);
+    gulp.watch(['./sample/index.html'], ['livereload']);
   });
 }());
