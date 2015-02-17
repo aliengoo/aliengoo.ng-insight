@@ -122,6 +122,13 @@
 
   angular.module("aliengoo.ng-insight").directive("ngModelInsight", ngModelInsight);
 
+  var mutationObserverConfig = {
+    childList: true,
+    subtree: true,
+    attributes: false,
+    characterData: false
+  };
+
   function ngModelInsight($compile, $window, $document) {
     var exports = {
       restrict: "A",
@@ -137,34 +144,24 @@
         return;
       }
 
-      var observer;
-
-      var mutationObserverConfig = {
-        childList: true,
-        subtree: true,
-        attributes: false,
-        characterData: false
-      };
-
-      function attachNgModelElements() {
+      function update() {
         scope.$evalAsync(function () {
           angular.forEach($(element).find("[ng-model]"), function (el) {
-            attach(el);
+            attach(element, observer, el);
           });
         });
       }
 
-      observer = new MutationObserver(function () {
-        console.log("m");
-        attachNgModelElements();
+      var observer = new MutationObserver(function () {
+        update();
       });
 
       observer.observe(element.get(0), mutationObserverConfig);
 
-      attachNgModelElements();
+      update();
     }
 
-    function attach(el) {
+    function attach(formElement, observer, el) {
       var ngEl = angular.element(el);
       var ngModel = ngEl.controller("ngModel");
       var name = "ngModelInsight_" + ngEl.attr("name").replace(".", "_");
@@ -182,18 +179,25 @@
 
         $compile(modelStateElement)(childScope);
 
+        observer.disconnect();
         ngEl.after(modelStateElement);
+        observer.observe(formElement.get(0), mutationObserverConfig);
 
-        ngModel.$viewChangeListeners.push(build);
+        childScope.$watch(function () {
+          return ngModel.$viewValue;
+        }, build);
       }
 
       function build() {
+        observer.disconnect();
         var errorsHtml = "";
+
         angular.forEach(Object.keys(childScope[name].$error || {}), function (e) {
           errorsHtml += "<samp class='indicator error'><em>" + e + "</em></samp>";
         });
 
         $(modelStateElement).find("[name=\"errors\"]").html(errorsHtml);
+        observer.observe(formElement.get(0), mutationObserverConfig);
       }
 
       build();

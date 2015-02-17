@@ -22,6 +22,8 @@
                minlength="5" maxlength="50"/>
       </div>
 
+      <pre>{{ngModelInsight_firstName | json}}</pre>
+
       <div class="form-group" ng-if="vm.showMiddleNames">
         <label for="middleNames">Middle names</label>
         <input type="text" ng-model="vm.person.middleNames" class="form-control" required id="middleNames" name="middleNames"
