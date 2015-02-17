@@ -1,5 +1,7 @@
 # ng-insight
 
+# Sorry, this has some pretty serious issues, best avoided at the moment.
+
 ## ng-model-insight
 
 ```ng-model-insight``` can be applied to a ```<form>``` element.  Any ```ng-model``` bound elements inside of the form are then given
