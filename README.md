@@ -1,5 +1,8 @@
 # ng-insight
 
+*This is undergoing some fundamental changes to correct handling of ng-model elements being added and removed from the DOM* 
+
+
 Visualise the current state of each ```ng-model``` bound element.
 
 ![](https://raw.githubusercontent.com/aliengoo/aliengoo.ng-insight/master/images/aliengoo-ng-insight-sample.gif)
