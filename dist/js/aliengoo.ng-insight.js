@@ -137,6 +137,11 @@
     return exports;
 
     function link(scope, element) {
+      // weird issue where element is undefined.
+      if (element) {
+        return;
+      }
+
       if (angular.isUndefined($)) {
         console.error("aliengoo.ng-insight requires jQuery!");
         return;
