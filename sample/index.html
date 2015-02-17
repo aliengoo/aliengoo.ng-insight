@@ -13,7 +13,7 @@
     <h1>aliengoo.ng-insight sample</h1>
   </header>
 
-  <form novalidate name="appForm" ng-model-insight="true" ng-scope-insight>
+  <form novalidate name="appForm" ng-model-insight>
     <div class="col-md-6">
 
       <div class="form-group">
@@ -21,6 +21,14 @@
         <input type="text" ng-model="vm.person.firstName" class="form-control" required id="firstName" name="firstName"
                minlength="5" maxlength="50"/>
       </div>
+
+      <div class="form-group" ng-if="vm.showMiddleNames">
+        <label for="middleNames">Middle names</label>
+        <input type="text" ng-model="vm.person.middleNames" class="form-control" required id="middleNames" name="middleNames"
+               minlength="5" maxlength="50"/>
+      </div>
+
+      <button class="btn btn-primary" ng-click="vm.showMiddleNames = !vm.showMiddleNames">Button state</button>
 
       <div class="form-group">
         <label for="lastName">Last name</label>

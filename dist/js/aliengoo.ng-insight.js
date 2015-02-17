@@ -8,9 +8,26 @@
 (function () {
   "use strict";
 
-  angular.module("aliengoo.ng-insight").directive("ngModelInsight", ngModelInsight);
+  angular.module("aliengoo.ng-insight").directive("ngAutoMessageInsight", ngAutoMessageInsight);
 
-  function ngModelInsight($compile) {
+  var messages = {
+    email: "Email address is not valid",
+    max: "Above maximum",
+    maxlength: "Maximum length exceeded",
+    min: "Below minimum",
+    minlength: "Minimum length not met",
+    number: "Not a valid number",
+    pattern: "Value is not valid",
+    required: "Value is required",
+    url: "Not a valid URL",
+    date: "Not a valid date",
+    datetimelocal: "Not a valid date/time",
+    time: "Not a valid time",
+    week: "Not a valid week",
+    month: "Not a valid month"
+  };
+
+  function ngAutoMessageInsight($compile) {
     var exports = {
       restrict: "A",
       require: "form",
@@ -26,95 +43,163 @@
       }
 
       var formElement = $(element);
-      attribute.$observe("ngModelInsight", function (enabled) {
+
+
+
+
+      attribute.$observe("ngAutoMessageInsight", function (enabled) {
         scope.$evalAsync(function () {
           var ngModelElements = formElement.find("[ng-model]").toArray();
 
           if (enabled === true || enabled === "true") {
-            observe(ngModelElements);
+            attach(ngModelElements);
           } else if (enabled === false || enabled === "false") {
-            unobserve(ngModelElements);
+            detach(ngModelElements);
           }
         });
       });
 
-      function observe(ngModelElements) {
-        ngModelElements.forEach(function (el) {
-          observeModel(scope, angular.element(el));
+      function attach(ngModelElements) {
+        angular.forEach(ngModelElements, function (el) {
+          attachMessages(angular.element(el));
         });
       }
 
-      function unobserve(ngModelElements) {
-        ngModelElements.forEach(function (el) {
-          unobserveModel(angular.element(el));
+      function detach(ngModelElements) {
+        angular.forEach(ngModelElements, function (el) {
+          detachMessages(angular.element(el));
         });
       }
     }
 
-    function observeModel(scope, ngElement) {
+    function attachMessages(ngElement) {
       var ngModel = ngElement.controller("ngModel");
-      var props = "dirty,pristine,error,valid,invalid,viewValue,modelValue".split(",");
-      var childScope;
-      var name = "ngModelInsight_" + ngElement.attr("ng-model").replace(".", "_");
+
+      if (!ngModel) {
+        return;
+      }
+      var scope = ngElement.scope();
+
+      var name = "ngAutoMessageInsight_" + ngElement.attr("name").replace(".", "_");
+
+      console.log(name);
+
+      if (scope) {
+        (function () {
+          scope[name] = ngModel;
+
+          var messagesHtml = "";
+
+          angular.forEach(Object.keys(messages), function (propertyName) {
+            var message = messages[propertyName];
+            messagesHtml += "<span class='ng-auto-message-insight' ng-message='" + propertyName + "'>" + message + "</span>";
+          });
+
+          var html = "<div ng-messages=\"" + name + ".$error\">" + messagesHtml + "</div>";
+
+          var messagesElement = angular.element(html);
+
+          $compile(messagesElement)(scope);
+
+          ngElement.after(messagesElement);
+        })();
+      }
+    }
+
+    function detachMessages(ngElement) {
+      var name = "ngAutoMessageInsight_" + ngElement.attr("ng-model").replace(".", "_");
       var selector = "[name=\"" + name + "\"]";
       var modelStateElement = $("body").find(selector);
-
       if (modelStateElement) {
-        var oldScope = angular.element(modelStateElement).scope();
-        if (oldScope) {
-          childScope = oldScope;
-        }
+        modelStateElement.remove();
+      }
+    }
+  }
+  ngAutoMessageInsight.$inject = ["$compile"];
+})();
+(function () {
+  "use strict";
+
+  angular.module("aliengoo.ng-insight").directive("ngModelInsight", ngModelInsight);
+
+  function ngModelInsight($compile, $window, $document) {
+    var exports = {
+      restrict: "A",
+      require: "form",
+      link: link
+    };
+
+    return exports;
+
+    function link(scope, element) {
+      if (angular.isUndefined($)) {
+        console.error("aliengoo.ng-insight requires jQuery!");
+        return;
       }
 
-      if (!childScope) {
-        childScope = scope.$new();
+      var observer;
 
-        var html = "\n          <samp class='indicator' ng-class='{\"dirty\" : dirty}' ng-show='dirty'>Dirty</samp>\n          <samp class='indicator' ng-class='{\"pristine\" : pristine}' ng-show='pristine'>Pristine</samp>\n          <samp class='indicator' ng-class='{\"valid\" : valid}' ng-show='valid'>Valid</samp>\n          <samp class='indicator' ng-class='{\"invalid\" : invalid}' ng-show='invalid'>Invalid</samp>\n          <samp name='errors' class='indicator errors'></samp>\n          <samp class='indicator view-value' ng-show='viewValue'>View: <em>{{viewValue}}</em></samp>\n          <samp class='indicator model-value' ng-show='modelValue'>Model: <em>{{modelValue}}</em></samp>";
+      var mutationObserverConfig = {
+        childList: true,
+        subtree: true,
+        attributes: false,
+        characterData: false
+      };
+
+      function attachNgModelElements() {
+        scope.$evalAsync(function () {
+          angular.forEach($(element).find("[ng-model]"), function (el) {
+            attach(el);
+          });
+        });
+      }
+
+      observer = new MutationObserver(function () {
+        console.log("m");
+        attachNgModelElements();
+      });
+
+      observer.observe(element.get(0), mutationObserverConfig);
+
+      attachNgModelElements();
+    }
+
+    function attach(el) {
+      var ngEl = angular.element(el);
+      var ngModel = ngEl.controller("ngModel");
+      var name = "ngModelInsight_" + ngEl.attr("name").replace(".", "_");
+      var selector = "[name=\"" + name + "\"]";
+      var childScope = angular.element(ngEl).scope();
+
+      childScope[name] = ngModel;
+
+      var modelStateElement = $(selector);
+      if (modelStateElement.length === 0) {
+        var html = "\n          <samp class='indicator' ng-class='{\"dirty\" : " + name + ".$dirty}' ng-show='" + name + ".$dirty'>Dirty</samp>\n          <samp class='indicator' ng-class='{\"pristine\" : " + name + ".$pristine}' ng-show='" + name + ".$pristine'>Pristine</samp>\n          <samp class='indicator' ng-class='{\"valid\" : " + name + ".$valid}' ng-show='" + name + ".$valid'>Valid</samp>\n          <samp class='indicator' ng-class='{\"invalid\" : " + name + ".$invalid}' ng-show='" + name + ".$invalid'>Invalid</samp>\n          <samp name='errors' class='indicator errors'></samp>\n          <samp class='indicator view-value' ng-show='" + name + ".$viewValue'>View: <em>{{" + name + ".$viewValue}}</em></samp>\n          <samp class='indicator model-value' ng-show='" + name + ".$modelValue'>Model: <em>{{" + name + ".$modelValue}}</em></samp>";
 
         modelStateElement = angular.element("<div name='" + name + "' class='ng-model-insight'>");
         modelStateElement.append(angular.element(html));
 
         $compile(modelStateElement)(childScope);
 
-        ngElement.after(modelStateElement);
+        ngEl.after(modelStateElement);
 
-        var build = function () {
-          var errorsHtml = "";
-          angular.forEach(Object.keys(childScope.error || {}), function (e) {
-            errorsHtml += "<samp class='indicator error'><em>" + e + "</em></samp>";
-          });
-
-          $(modelStateElement).find("[name=\"errors\"]").html(errorsHtml);
-
-          angular.forEach(props, function (prop) {
-            childScope[prop] = ngModel["$" + prop];
-          });
-        };
-
-        childScope.$watch(function () {
-          return ngModel.$viewValue;
-        }, build);
-
-        build();
+        ngModel.$viewChangeListeners.push(build);
       }
-    }
 
-    function unobserveModel(ngElement) {
-      var name = "ngModelInsight_" + ngElement.attr("ng-model").replace(".", "_");
-      var selector = "[name=\"" + name + "\"]";
-      var modelStateElement = $("body").find(selector);
-      if (modelStateElement) {
-        var oldScope = angular.element(modelStateElement).scope();
-        if (oldScope) {
-          oldScope.$destroy();
-          oldScope = null;
-        }
+      function build() {
+        var errorsHtml = "";
+        angular.forEach(Object.keys(childScope[name].$error || {}), function (e) {
+          errorsHtml += "<samp class='indicator error'><em>" + e + "</em></samp>";
+        });
 
-        modelStateElement.remove();
+        $(modelStateElement).find("[name=\"errors\"]").html(errorsHtml);
       }
+
+      build();
     }
   }
-  ngModelInsight.$inject = ["$compile"];
+  ngModelInsight.$inject = ["$compile", "$window", "$document"];
 })();
 (function () {
   "use strict";
@@ -161,7 +246,7 @@
         });
       });
 
-      var config = { attributes: true, childList: true, characterData: true };
+      var config = { childList: true };
 
 
       scope.$evalAsync(function () {
