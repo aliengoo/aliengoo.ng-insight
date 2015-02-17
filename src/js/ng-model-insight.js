@@ -22,7 +22,7 @@
     function link(scope, element) {
 
       // weird issue where element is undefined.
-      if (element){
+      if (!element.length){
         return;
       }
 
@@ -51,7 +51,7 @@
     function attach(formElement, observer, el) {
       var ngEl = angular.element(el);
       var ngModel = ngEl.controller('ngModel');
-      var name = 'ngModelInsight_' + ngEl.attr('name').replace('.', '_');
+      var name = 'ngModelInsight_' + ngEl.attr('ng-model').replace(/\./g, '_');
       var selector = `[name="${name}"]`;
       var childScope = angular.element(ngEl).scope();
 
