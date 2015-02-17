@@ -37,6 +37,10 @@
     return exports;
 
     function link(scope, element, attributes) {
+      
+      if (!element.length){
+        return;
+      }
 
       if (angular.isUndefined($)) {
         console.error('aliengoo.ng-insight requires jQuery!');
@@ -63,7 +67,7 @@
     function attach(formElement, observer, el, attributes) {
       var ngEl = angular.element(el);
       var ngModel = ngEl.controller('ngModel');
-      var name = 'ngAutoMessageInsight_' + ngEl.attr('name').replace('.', '_');
+      var name = 'ngAutoMessageInsight_' + ngEl.attr('ng-model').replace(/\./g, '_');
       var selector = `[name="${name}"]`;
       var childScope = angular.element(ngEl).scope();
       childScope[name] = ngModel;
