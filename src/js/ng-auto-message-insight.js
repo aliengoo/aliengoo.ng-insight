@@ -3,21 +3,28 @@
 
   angular.module('aliengoo.ng-insight').directive('ngAutoMessageInsight', ngAutoMessageInsight);
 
+  var mutationObserverConfig = {
+    childList: true
+    , subtree: true
+    , attributes: false
+    , characterData: false
+  };
+
   var messages = {
-    email : 'Email address is not valid',
-    max : 'Above maximum',
-    maxlength : 'Maximum length exceeded',
-    min : 'Below minimum',
-    minlength : 'Minimum length not met',
-    number : 'Not a valid number',
-    pattern : 'Value is not valid',
-    required : 'Value is required',
-    url : 'Not a valid URL',
-    date : 'Not a valid date',
-    datetimelocal : 'Not a valid date/time',
-    time : 'Not a valid time',
-    week : 'Not a valid week',
-    month : 'Not a valid month'
+    email: 'Email address is not valid',
+    max: 'Above maximum permitted value',
+    maxlength: 'Maximum length exceeded',
+    min: 'Below minimum permitted value',
+    minlength: 'Minimum length not met',
+    number: 'Not a valid number',
+    pattern: 'Value is not valid',
+    required: 'Value is required',
+    url: 'Not a valid URL',
+    date: 'Not a valid date',
+    datetimelocal: 'Not a valid date/time',
+    time: 'Not a valid time',
+    week: 'Not a valid week',
+    month: 'Not a valid month'
   };
 
   function ngAutoMessageInsight($compile) {
@@ -29,59 +36,40 @@
 
     return exports;
 
-    function link(scope, element, attribute) {
+    function link(scope, element, attributes) {
 
       if (angular.isUndefined($)) {
         console.error('aliengoo.ng-insight requires jQuery!');
         return;
       }
 
-      var formElement = $(element);
-
-
-
-
-      attribute.$observe('ngAutoMessageInsight', function (enabled) {
+      function update() {
         scope.$evalAsync(() => {
-
-          var ngModelElements = formElement.find('[ng-model]').toArray();
-
-          if (enabled === true || enabled === 'true') {
-            attach(ngModelElements);
-          } else if (enabled === false || enabled === 'false') {
-            detach(ngModelElements);
-          }
+          angular.forEach($(element).find('[ng-model]'), (el) => {
+            attach(element, observer, el, attributes);
+          });
         });
+      }
+
+      var observer = new MutationObserver(() => {
+        update();
       });
 
-      function attach(ngModelElements) {
-        angular.forEach(ngModelElements, (el) => {
-          attachMessages(angular.element(el));
-        });
-      }
+      observer.observe(element.get(0), mutationObserverConfig);
 
-      function detach(ngModelElements) {
-        angular.forEach(ngModelElements, (el) => {
-          detachMessages(angular.element(el));
-        });
-      }
+      update();
     }
 
-    function attachMessages(ngElement) {
+    function attach(formElement, observer, el, attributes) {
+      var ngEl = angular.element(el);
+      var ngModel = ngEl.controller('ngModel');
+      var name = 'ngAutoMessageInsight_' + ngEl.attr('name').replace('.', '_');
+      var selector = `[name="${name}"]`;
+      var childScope = angular.element(ngEl).scope();
+      childScope[name] = ngModel;
+      var messagesEl = $(selector);
 
-      var ngModel = ngElement.controller('ngModel');
-
-      if (!ngModel) {
-        return;
-      }
-      var scope = ngElement.scope();
-
-      var name = 'ngAutoMessageInsight_' + ngElement.attr('name').replace('.', '_');
-
-      console.log(name);
-
-      if (scope) {
-        scope[name] = ngModel;
+      if (messagesEl.length === 0) {
 
         let messagesHtml = '';
 
@@ -90,22 +78,23 @@
           messagesHtml += `<span class='ng-auto-message-insight' ng-message='${propertyName}'>${message}</span>`;
         });
 
-        let html = `<div ng-messages="${name}.$error">${messagesHtml}</div>`;
+        let whenDirty = '';
+
+        if (attributes.hasOwnProperty('ngAutoMessageInsightWhenDirty')){
+          whenDirty = ` ng-show="${name}.$dirty"`;
+        }
+
+        let html = `<div ng-messages="${name}.$error" ${whenDirty} name="${name}">${messagesHtml}</div>`;
 
         let messagesElement = angular.element(html);
 
-        $compile(messagesElement)(scope);
+        $compile(messagesElement)(childScope);
 
-        ngElement.after(messagesElement);
-      }
-    }
+        observer.disconnect();
 
-    function detachMessages(ngElement) {
-      let name = 'ngAutoMessageInsight_' + ngElement.attr('ng-model').replace('.', '_');
-      let selector = `[name="${name}"]`;
-      var modelStateElement = $('body').find(selector);
-      if (modelStateElement) {
-        modelStateElement.remove();
+        ngEl.after(messagesElement);
+
+        observer.observe(formElement.get(0), mutationObserverConfig);
       }
     }
   }

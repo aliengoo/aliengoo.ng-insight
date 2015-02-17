@@ -1,10 +1,10 @@
 {
   "name": "aliengoo.ng-insight",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "authors": [
     "aliengoo"
   ],
-  "description": "Provide visual insight into the state each input in a form",
+  "description": "Directives that add information to elements",
   "main": [
     "./dist/js/aliengoo.ng-insight.js",
     "./dist/css/aliengoo.ng-insight.css"
@@ -23,7 +23,8 @@
   ],
   "dependencies": {
     "jquery": "~2.1.3",
-    "angular": "~1.3.13"
+    "angular": "~1.3.13",
+    "angular-messages": "~1.3.13"
   },
   "repository": {
     "type": "git",

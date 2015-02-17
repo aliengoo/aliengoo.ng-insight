@@ -13,7 +13,7 @@
     <h1>aliengoo.ng-insight sample</h1>
   </header>
 
-  <form novalidate name="appForm" ng-model-insight>
+  <form novalidate name="appForm" ng-model-insight ng-auto-message-insight >
     <div class="col-md-6">
 
       <div class="form-group">
@@ -22,7 +22,7 @@
                minlength="5" maxlength="50"/>
       </div>
 
-      <pre>{{ngModelInsight_firstName | json}}</pre>
+
 
       <div class="form-group" ng-if="vm.showMiddleNames">
         <label for="middleNames">Middle names</label>
@@ -45,16 +45,27 @@
       </div>
 
       <div class="form-group">
+        <label for="homePageUrl">Home page</label>
+        <input type="url" ng-model="vm.person.homePageUrl" class="form-control" required id="homePageUrl" name="homePageUrl"
+               minlength="5" maxlength="200"/>
+      </div>
+
+      <div class="form-group">
+        <label for="emailAddress">Email</label>
+        <input type="email" ng-model="vm.person.emailAddress" class="form-control" required id="emailAddress" name="emailAddress"
+               minlength="5" maxlength="200"/>
+      </div>
+
+      <div class="form-group">
         <label for="birthDate">Birth date</label>
         <input type="date" ng-model="vm.person.birthDate" class="form-control" required id="birthDate" name="birthDate" min="1900-01-01" max="2015-01-01"/>
       </div>
-
-
     </div>
   </form>
 </div>
-<script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.13/angular.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.13/angular.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.13/angular-messages.min.js"></script>
 <script src="../dist/js/aliengoo.ng-insight.js"></script>
 <script>
   angular.module('aliengoo.sample', ['aliengoo.ng-insight']).controller('App', App);
