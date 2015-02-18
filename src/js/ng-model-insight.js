@@ -61,7 +61,12 @@
         return;
       }
 
-      var name = `ngModelInsight_${childNode.ngModelBinding.replace(/\./g, "_")}`;
+      if (!childNode.ngElementName) {
+        console.error(`Cannot add ngModelInsight because the target not ${childNode.ngModelBinding} has no name`);
+        return;
+      }
+
+      var name = `ngModelInsight_${childNode.ngElementName.replace(/\./g, "_")}`;
 
       var selector = `[name="${name}"]`;
       childNode.scope[name] = childNode.ngModel;
