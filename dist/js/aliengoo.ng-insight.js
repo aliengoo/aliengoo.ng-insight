@@ -132,7 +132,7 @@
     characterData: false
   };
 
-  function ngModelInsight($compile, $window, $document) {
+  function ngModelInsight($compile, $timeout) {
     var exports = {
       restrict: "A",
       require: "form",
@@ -142,37 +142,55 @@
     return exports;
 
     function link(scope, element) {
-      // weird issue where element is undefined.
-      if (!element.length) {
-        return;
-      }
-
       if (angular.isUndefined($)) {
         console.error("aliengoo.ng-insight requires jQuery!");
         return;
       }
 
-      function update() {
-        scope.$evalAsync(function () {
-          angular.forEach($(element).find("[ng-model]"), function (el) {
-            attach(element, observer, el);
-          });
+      var rootNode = element[0];
+
+      function walk() {
+        var treeWalker = document.createTreeWalker(rootNode, NodeFilter.SHOW_ELEMENT, {
+          acceptNode: function (n) {
+            if (n.tagName === "INPUT" || n.tagName === "SELECT" || n.tagName === "TEXTAREA") {
+              return NodeFilter.FILTER_ACCEPT;
+            } else {
+              return NodeFilter.FILTER_SKIP;
+            }
+          }
         });
+
+        while (treeWalker.nextNode()) {
+          attach(rootNode, observer, treeWalker.currentNode);
+        }
       }
 
       var observer = new MutationObserver(function () {
-        update();
+        walk();
       });
 
-      observer.observe(element.get(0), mutationObserverConfig);
-
-      update();
+      $timeout(function () {
+        walk();
+        observer.observe(rootNode, mutationObserverConfig);
+      }, 1);
     }
 
-    function attach(formElement, observer, el) {
+    function attach(node, observer, el) {
       var ngEl = angular.element(el);
       var ngModel = ngEl.controller("ngModel");
-      var name = "ngModelInsight_" + ngEl.attr("ng-model").replace(/\./g, "_");
+
+      if (!ngModel) {
+        return;
+      }
+
+      var elementName = ngEl.attr("name");
+
+      if (angular.isUndefined(elementName)) {
+        throw "ng-model-insight requires " + ngEl.attr("ng-model") + " has a name";
+      }
+
+      var name = "ngModelInsight_" + elementName.replace(/\./g, "_");
+
       var selector = "[name=\"" + name + "\"]";
       var childScope = angular.element(ngEl).scope();
 
@@ -189,7 +207,7 @@
 
         observer.disconnect();
         ngEl.after(modelStateElement);
-        observer.observe(formElement.get(0), mutationObserverConfig);
+        observer.observe(node, mutationObserverConfig);
 
         childScope.$watch(function () {
           return ngModel.$viewValue;
@@ -205,13 +223,13 @@
         });
 
         $(modelStateElement).find("[name=\"errors\"]").html(errorsHtml);
-        observer.observe(formElement.get(0), mutationObserverConfig);
+        observer.observe(node, mutationObserverConfig);
       }
 
       build();
     }
   }
-  ngModelInsight.$inject = ["$compile", "$window", "$document"];
+  ngModelInsight.$inject = ["$compile", "$timeout"];
 })();
 
 (function () {
