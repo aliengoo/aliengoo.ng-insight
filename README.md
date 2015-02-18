@@ -1,24 +1,27 @@
 # ng-insight
 
-# Work in progress, there are still, potentially, some issues with multiple MutationObservers
 
 ## ng-model-insight
 
 ```ng-model-insight``` can be applied to a ```<form>``` element.  Any ```ng-model``` bound elements inside of the form are then given
 a set of indicators about the current state of the ```ng-model```.
 
+
 ![](https://raw.githubusercontent.com/aliengoo/aliengoo.ng-insight/master/images/aliengoo-ng-insight-sample.gif)
 
 See the [ng-model-insight demo](http://plnkr.co/edit/bhCXJdfOMSphN7RK0iae?p=preview) on Plunker.
 
-## ng-auto-message-insight
+## How it works
 
-```ng-auto-message-insight```, like ```ng-model-insight```, can be applied to a container element, and again, like ```ng-model-insight```, monitors the
-current ```ng-model``` state.  But unlike ```ng-model-insight``` displays friendly messages for each built-in error provided by angular, e.g. _date_, _email_, _required_,
-etc.
+Initially, the DOM is walked, looking for ```input```, ```select``` and ```textarea``` elements with an ```ng-model``` binding.
 
-Sometimes, you don't want to show the message immediately, i.e, when ```$pristine```.  To prevent messages appearing, add the ```ng-auto-message-insight-when-dirty``` attribute
-to the same container as ```ng-auto-message-insight```.
+A new element is added after the ```ng-model``` bound element.
+
+### DOM Mutations
+
+```ng-model-insight``` watches for DOM mutations using a MutationObserver where the node is the element ```ng-model-insight``` is set.
+
+If any DOM mutation occurs, MutationRecords are checked to see if any elements are a type of input, and if so, ```ng-model-insight``` elements are added or removed.
 
 ## Installation
 
@@ -27,7 +30,5 @@ to the same container as ```ng-auto-message-insight```.
 Add a reference in your Angular module.
 
 	angular.module('myApp', ['aliengoo.ng-insight', 'ngMessages']);
-
-*Note* ```angular-messages``` is required for ```ng-auto-message-insight```.
 
 Add ```aliengoo.ng-insight.js``` and ```aliengoo.ng-insight.css``` to your preferred build solution.
