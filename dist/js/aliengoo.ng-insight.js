@@ -123,16 +123,126 @@
 (function () {
   "use strict";
 
+  angular.module("aliengoo.ng-insight").factory("helperService", helperService);
+
+  function helperService() {
+    var exports = {
+      walkModelNodes: walkModelNodes,
+      containsNodeType: containsNodeType
+    };
+
+    return exports;
+
+    function containsNodeType(mutationRecords) {
+      for (var _len = arguments.length, tagNames = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        tagNames[_key - 1] = arguments[_key];
+      }
+
+      var walk = function (rootNode) {
+        var treeWalker = document.createTreeWalker(rootNode, NodeFilter.SHOW_ELEMENT, {
+          acceptNode: function (n) {
+            if (tagNames.filter(function (tn) {
+              return n.tagName === tn;
+            }).length > 0) {
+              return NodeFilter.FILTER_ACCEPT;
+            } else {
+              return NodeFilter.FILTER_SKIP;
+            }
+          }
+        });
+
+        var count = 0;
+
+        while (treeWalker.nextNode()) {
+          count++;
+        }
+
+        return count > 0;
+      };
+
+      var signalInterestingChange = false;
+
+      for (var i = 0; i < mutationRecords.length; i++) {
+        var mutationRecord = mutationRecords[i];
+
+        var allNodes = [];
+
+        if (mutationRecord.removedNodes && mutationRecord.removedNodes.length) {
+          for (var _i = 0; _i < mutationRecord.removedNodes.length; _i++) {
+            allNodes.push(mutationRecord.removedNodes[_i]);
+          }
+        }
+
+        if (mutationRecord.addedNodes && mutationRecord.addedNodes.length) {
+          for (var _i2 = 0; _i2 < mutationRecord.addedNodes.length; _i2++) {
+            allNodes.push(mutationRecord.addedNodes[_i2]);
+          }
+        }
+
+        for (var j = 0; j < allNodes.length; j++) {
+          var childNode = allNodes[i];
+
+          if (childNode && walk(childNode)) {
+            signalInterestingChange = true;
+            break;
+            break;
+          }
+        }
+      }
+
+      return signalInterestingChange;
+    }
+
+    ///////////////
+    function walkModelNodes(rootNode, onNode) {
+      var treeWalker = document.createTreeWalker(rootNode, NodeFilter.SHOW_ELEMENT, {
+        acceptNode: function (n) {
+          if (n.tagName === "INPUT" || n.tagName === "SELECT" || n.tagName === "TEXTAREA") {
+            return NodeFilter.FILTER_ACCEPT;
+          } else {
+            return NodeFilter.FILTER_SKIP;
+          }
+        }
+      });
+
+      while (treeWalker.nextNode()) {
+        var ngEl = angular.element(treeWalker.currentNode);
+        var ngModel = ngEl.controller("ngModel");
+
+        if (!ngModel) {
+          return {
+            error: "No ng-model available"
+          };
+        }
+
+        var elementName = ngEl.attr("name");
+        var childScope = ngEl.scope();
+
+        onNode({
+          ngElement: ngEl,
+          ngElementName: elementName,
+          ngModelBinding: ngEl.attr("ng-model"),
+          ngModel: ngModel,
+          scope: childScope
+        });
+      }
+    }
+  }
+})();
+(function () {
+  "use strict";
+
   angular.module("aliengoo.ng-insight").directive("ngModelInsight", ngModelInsight);
 
   var mutationObserverConfig = {
     childList: true,
     subtree: true,
-    attributes: false,
+    attributeFilter: ["ng-model"],
+    attributes: true,
     characterData: false
   };
 
-  function ngModelInsight($compile, $timeout) {
+  function ngModelInsight($compile, $timeout, $log, helperService) {
     var exports = {
       restrict: "A",
       require: "form",
@@ -141,7 +251,7 @@
 
     return exports;
 
-    function link(scope, element) {
+    function link(scope, element, attributes) {
       if (angular.isUndefined($)) {
         console.error("aliengoo.ng-insight requires jQuery!");
         return;
@@ -150,67 +260,56 @@
       var rootNode = element[0];
 
       function walk() {
-        var treeWalker = document.createTreeWalker(rootNode, NodeFilter.SHOW_ELEMENT, {
-          acceptNode: function (n) {
-            if (n.tagName === "INPUT" || n.tagName === "SELECT" || n.tagName === "TEXTAREA") {
-              return NodeFilter.FILTER_ACCEPT;
-            } else {
-              return NodeFilter.FILTER_SKIP;
-            }
-          }
+        helperService.walkModelNodes(rootNode, function (childNode) {
+          attach(rootNode, observer, childNode);
         });
-
-        while (treeWalker.nextNode()) {
-          attach(rootNode, observer, treeWalker.currentNode);
-        }
       }
 
-      var observer = new MutationObserver(function () {
-        walk();
+      var observer = new MutationObserver(function (mutationRecords) {
+        if (helperService.containsNodeType(mutationRecords, "INPUT", "SELECT", "TEXTAREA")) {
+          $log.debug("walking for ng-model-insight");
+          walk();
+        }
       });
 
-      $timeout(function () {
-        walk();
-        observer.observe(rootNode, mutationObserverConfig);
-      }, 1);
+      attributes.$observe("ngModelInsight", function (newValue) {
+        if (newValue) {
+          $timeout(function () {
+            walk();
+            observer.observe(rootNode, mutationObserverConfig);
+          }, 1);
+        } else {
+          observer.disconnect();
+          $(".ng-model-insight").remove();
+        }
+      });
     }
 
-    function attach(node, observer, el) {
-      var ngEl = angular.element(el);
-      var ngModel = ngEl.controller("ngModel");
-
-      if (!ngModel) {
+    function attach(node, observer, childNode) {
+      if (childNode.error) {
         return;
       }
 
-      var elementName = ngEl.attr("name");
-
-      if (angular.isUndefined(elementName)) {
-        throw "ng-model-insight requires " + ngEl.attr("ng-model") + " has a name";
-      }
-
-      var name = "ngModelInsight_" + elementName.replace(/\./g, "_");
+      var name = "ngModelInsight_" + childNode.ngModelBinding.replace(/\./g, "_");
 
       var selector = "[name=\"" + name + "\"]";
-      var childScope = angular.element(ngEl).scope();
-
-      childScope[name] = ngModel;
+      childNode.scope[name] = childNode.ngModel;
 
       var modelStateElement = $(selector);
       if (modelStateElement.length === 0) {
-        var html = "\n          <samp class='indicator' ng-class='{\"dirty\" : " + name + ".$dirty}' ng-show='" + name + ".$dirty'>Dirty</samp>\n          <samp class='indicator' ng-class='{\"pristine\" : " + name + ".$pristine}' ng-show='" + name + ".$pristine'>Pristine</samp>\n          <samp class='indicator' ng-class='{\"valid\" : " + name + ".$valid}' ng-show='" + name + ".$valid'>Valid</samp>\n          <samp class='indicator' ng-class='{\"invalid\" : " + name + ".$invalid}' ng-show='" + name + ".$invalid'>Invalid</samp>\n          <samp name='errors' class='indicator errors'></samp>\n          <samp class='indicator view-value' ng-show='" + name + ".$viewValue'>View: <em>{{" + name + ".$viewValue}}</em></samp>\n          <samp class='indicator model-value' ng-show='" + name + ".$modelValue'>Model: <em>{{" + name + ".$modelValue}}</em></samp>";
+        var html = "\n          <span class='indicator scope'>$" + childNode.scope.$id + "</span>\n          <span class='indicator' ng-class='{\"dirty\" : " + name + ".$dirty}' ng-show='" + name + ".$dirty'>Dirty</span>\n          <span class='indicator' ng-class='{\"pristine\" : " + name + ".$pristine}' ng-show='" + name + ".$pristine'>Pristine</span>\n          <span class='indicator' ng-class='{\"valid\" : " + name + ".$valid}' ng-show='" + name + ".$valid'>Valid</span>\n          <span class='indicator' ng-class='{\"invalid\" : " + name + ".$invalid}' ng-show='" + name + ".$invalid'>Invalid</span>\n          <span name='errors' class='indicator errors'></span>\n          <span class='indicator view-value' ng-show='" + name + ".$viewValue'>View: <em>{{" + name + ".$viewValue}}</em></span>\n          <span class='indicator model-value' ng-show='" + name + ".$modelValue'>Model: <em>{{" + name + ".$modelValue}}</em></span>";
 
         modelStateElement = angular.element("<div name='" + name + "' class='ng-model-insight'>");
         modelStateElement.append(angular.element(html));
 
-        $compile(modelStateElement)(childScope);
+        $compile(modelStateElement)(childNode.scope);
 
         observer.disconnect();
-        ngEl.after(modelStateElement);
+        childNode.ngElement.after(modelStateElement);
         observer.observe(node, mutationObserverConfig);
 
-        childScope.$watch(function () {
-          return ngModel.$viewValue;
+        childNode.scope.$watch(function () {
+          return childNode.ngModel.$viewValue;
         }, build);
       }
 
@@ -218,8 +317,8 @@
         observer.disconnect();
         var errorsHtml = "";
 
-        angular.forEach(Object.keys(childScope[name].$error || {}), function (e) {
-          errorsHtml += "<samp class='indicator error'><em>" + e + "</em></samp>";
+        angular.forEach(Object.keys(childNode.scope[name].$error || {}), function (e) {
+          errorsHtml += "<span class='indicator error'><em>" + e + "</em></span>";
         });
 
         $(modelStateElement).find("[name=\"errors\"]").html(errorsHtml);
@@ -229,72 +328,5 @@
       build();
     }
   }
-  ngModelInsight.$inject = ["$compile", "$timeout"];
-})();
-
-(function () {
-  "use strict";
-
-  angular.module("aliengoo.ng-insight").directive("ngScopeInsight", ngScopeInsight);
-
-  function ngScopeInsight() {
-    var exports = {
-      restrict: "A",
-      link: link
-    };
-
-    return exports;
-
-    function link(scope, element) {
-      if (!element.length) {
-        return;
-      }
-
-      if (angular.isUndefined($)) {
-        console.error("aliengoo.ng-insight requires jQuery!");
-        return;
-      }
-
-      var body = $("body");
-
-      function processElement(element) {
-        var ngElement = angular.element(element);
-        var scope = ngElement.scope();
-
-        if (scope) {
-          var _name = ngElement.attr("name");
-          $("span.ng-scope-insight[name=\"" + _name + "\"]").remove();
-          var id = scope.$id;
-          var offset = ngElement.offset();
-          var left = offset.left;
-          var _top = offset.top - $(document).scrollTop();
-
-          var html = "<span class=\"ng-scope-insight\" name='" + _name + "' style='position:absolute;left:" + left + "px;top:" + _top + "px'>" + id + "</span>";
-
-          body.append(angular.element(html));
-        }
-      }
-
-      var observer = new MutationObserver(function (mutationRecords) {
-        angular.forEach(mutationRecords, function (mutationRecord) {
-          processElement(mutationRecord.target);
-        });
-      });
-
-      var config = { childList: true };
-
-
-      scope.$evalAsync(function () {
-        var ngModelElements = $(element).find("[ng-model]");
-
-        $(window).resize(function () {
-          angular.forEach(ngModelElements, processElement);
-        });
-
-        angular.forEach(ngModelElements, function (ngModelElement) {
-          observer.observe(ngModelElement, config);
-        });
-      });
-    }
-  }
+  ngModelInsight.$inject = ["$compile", "$timeout", "$log", "helperService"];
 })();

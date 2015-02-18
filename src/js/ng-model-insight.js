@@ -6,11 +6,12 @@
   var mutationObserverConfig = {
     childList: true
     , subtree: true
-    , attributes: false
+    , attributeFilter: ["ng-model"]
+    , attributes: true
     , characterData: false
   };
 
-  function ngModelInsight($compile, $timeout) {
+  function ngModelInsight($compile, $timeout, $log, helperService) {
     var exports = {
       restrict: 'A',
       require: 'form',
@@ -19,7 +20,7 @@
 
     return exports;
 
-    function link(scope, element) {
+    function link(scope, element, attributes) {
 
       if (angular.isUndefined($)) {
         console.error('aliengoo.ng-insight requires jQuery!');
@@ -29,81 +30,72 @@
       var rootNode = element[0];
 
       function walk() {
-        var treeWalker = document.createTreeWalker(rootNode, NodeFilter.SHOW_ELEMENT, {
-          acceptNode: (n) => {
-            if (n.tagName === 'INPUT' || n.tagName === 'SELECT' || n.tagName === 'TEXTAREA') {
-              return NodeFilter.FILTER_ACCEPT;
-            } else {
-              return NodeFilter.FILTER_SKIP;
-            }
-          }
+        helperService.walkModelNodes(rootNode, (childNode) => {
+          attach(rootNode, observer, childNode);
         });
-
-        while (treeWalker.nextNode()) {
-          attach(rootNode, observer, treeWalker.currentNode);
-        }
       }
 
-      var observer = new MutationObserver(function () {
-        walk();
+      var observer = new MutationObserver((mutationRecords) => {
+        if (helperService.containsNodeType(mutationRecords, "INPUT", "SELECT", "TEXTAREA")) {
+          $log.debug('walking for ng-model-insight');
+          walk();
+        }
       });
 
-      $timeout(() => {
-        walk();
-        observer.observe(rootNode, mutationObserverConfig);
-      }, 1);
+      attributes.$observe('ngModelInsight', (newValue) => {
+        if (newValue) {
+          $timeout(() => {
+            walk();
+            observer.observe(rootNode, mutationObserverConfig);
+          }, 1);
+        } else {
+          observer.disconnect();
+          $('.ng-model-insight').remove();
+        }
+      });
     }
 
-    function attach(node, observer, el) {
-      var ngEl = angular.element(el);
-      var ngModel = ngEl.controller('ngModel');
+    function attach(node, observer, childNode) {
 
-      if (!ngModel) {
+      if (childNode.error) {
         return;
       }
 
-      var elementName = ngEl.attr("name");
-
-      if (angular.isUndefined(elementName)) {
-        throw "ng-model-insight requires " + ngEl.attr('ng-model') + " has a name";
-      }
-
-      var name = "ngModelInsight_" + elementName.replace(/\./g, "_");
+      var name = `ngModelInsight_${childNode.ngModelBinding.replace(/\./g, "_")}`;
 
       var selector = `[name="${name}"]`;
-      var childScope = angular.element(ngEl).scope();
-
-      childScope[name] = ngModel;
+      childNode.scope[name] = childNode.ngModel;
 
       var modelStateElement = $(selector);
       if (modelStateElement.length === 0) {
         let html = `
-          <samp class='indicator' ng-class='{"dirty" : ${name}.$dirty}' ng-show='${name}.$dirty'>Dirty</samp>
-          <samp class='indicator' ng-class='{"pristine" : ${name}.$pristine}' ng-show='${name}.$pristine'>Pristine</samp>
-          <samp class='indicator' ng-class='{"valid" : ${name}.$valid}' ng-show='${name}.$valid'>Valid</samp>
-          <samp class='indicator' ng-class='{"invalid" : ${name}.$invalid}' ng-show='${name}.$invalid'>Invalid</samp>
-          <samp name='errors' class='indicator errors'></samp>
-          <samp class='indicator view-value' ng-show='${name}.$viewValue'>View: <em>{{${name}.$viewValue}}</em></samp>
-          <samp class='indicator model-value' ng-show='${name}.$modelValue'>Model: <em>{{${name}.$modelValue}}</em></samp>`;
+          <span class='indicator scope'>$${childNode.scope.$id}</span>
+          <span class='indicator' ng-class='{"dirty" : ${name}.$dirty}' ng-show='${name}.$dirty'>Dirty</span>
+          <span class='indicator' ng-class='{"pristine" : ${name}.$pristine}' ng-show='${name}.$pristine'>Pristine</span>
+          <span class='indicator' ng-class='{"valid" : ${name}.$valid}' ng-show='${name}.$valid'>Valid</span>
+          <span class='indicator' ng-class='{"invalid" : ${name}.$invalid}' ng-show='${name}.$invalid'>Invalid</span>
+          <span name='errors' class='indicator errors'></span>
+          <span class='indicator view-value' ng-show='${name}.$viewValue'>View: <em>{{${name}.$viewValue}}</em></span>
+          <span class='indicator model-value' ng-show='${name}.$modelValue'>Model: <em>{{${name}.$modelValue}}</em></span>`;
 
         modelStateElement = angular.element(`<div name='${name}' class='ng-model-insight'>`);
         modelStateElement.append(angular.element(html));
 
-        $compile(modelStateElement)(childScope);
+        $compile(modelStateElement)(childNode.scope);
 
         observer.disconnect();
-        ngEl.after(modelStateElement);
+        childNode.ngElement.after(modelStateElement);
         observer.observe(node, mutationObserverConfig);
 
-        childScope.$watch(() => ngModel.$viewValue, build);
+        childNode.scope.$watch(() => childNode.ngModel.$viewValue, build);
       }
 
       function build() {
         observer.disconnect();
         var errorsHtml = '';
 
-        angular.forEach(Object.keys(childScope[name].$error || {}), function (e) {
-          errorsHtml += `<samp class='indicator error'><em>${e}</em></samp>`;
+        angular.forEach(Object.keys(childNode.scope[name].$error || {}), function (e) {
+          errorsHtml += `<span class='indicator error'><em>${e}</em></span>`;
         });
 
         $(modelStateElement).find('[name="errors"]').html(errorsHtml);

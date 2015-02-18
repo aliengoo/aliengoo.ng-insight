@@ -13,8 +13,13 @@
     <h1>aliengoo.ng-insight sample</h1>
   </header>
 
-  <form novalidate name="appForm" ng-model-insight ng-auto-message-insight >
+
+  <form novalidate name="appForm" ng-auto-message-insight ng-model-insight="{{vm.showInsight}}" ng-scope-insight="{{vm.showInsight}}">
+
     <div class="col-md-6">
+
+      <button class="btn btn-primary" ng-click="vm.toggle()" ng-show="vm.showInsight">Hide insight</button>
+      <button class="btn btn-primary" ng-click="vm.toggle()" ng-hide="vm.showInsight">Show insight</button>
 
       <div class="form-group">
         <label for="firstName">First name</label>
@@ -72,6 +77,16 @@
 
   function App() {
     var vm = this;
+
+    vm.showInsight = 'show';
+
+    vm.toggle = function () {
+       if (vm.showInsight) {
+         vm.showInsight = '';
+       } else {
+         vm.showInsight = 'show';
+       }
+    };
 
     vm.person = {
       firstName: '',

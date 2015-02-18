@@ -7,7 +7,7 @@ $pristineTextColor : white;
 $validColor : #408037;
 $validTextColor : white;
 
-$invalidColor : #ff0e1d;
+$invalidColor : #d61720;
 $invalidTextColor : white;
 
 $viewValueColor : #c767d1;
@@ -16,14 +16,21 @@ $viewValueTextColor : white;
 $modelValueColor : #6d896a;
 $modelValueTextColor : white;
 
+$scopeColor : #a2126f;
+$scopeTextColor : white;
+
+$debugFontFamily: Consolas, inherit;
+
 @mixin indicator($indicatorType, $backgroundColor, $textColor){
 
   .indicator {
     &.#{$indicatorType} {
+      font-family: $debugFontFamily;
+      font-weight: bold;
       display : inline-block;
       border: 1px solid $backgroundColor;
-      margin-top: 2px;
-      padding: 2px;
+      margin-top: 1px;
+      padding: 1px;
       background-color: $backgroundColor;
       color : $textColor;
     }
@@ -31,7 +38,8 @@ $modelValueTextColor : white;
 }
 
 .ng-model-insight {
-  font-size : 12px;
+  font-size : 10px;
+  @include indicator('scope', $scopeColor, $scopeTextColor);
   @include indicator('dirty', $dirtyColor, $dirtyTextColor);
   @include indicator('pristine', $pristineColor, $pristineTextColor);
   @include indicator('valid', $validColor, $validTextColor);
@@ -41,21 +49,12 @@ $modelValueTextColor : white;
   @include indicator('model-value', $modelValueColor, $modelValueTextColor);
 }
 
-.ng-scope-insight{
-    font-size: 10px;
-    display: inline-block;
-    border: 1px solid;
-    padding: 2px;
-    color: white;
-    background-color: #4649df;
-}
-
 .ng-auto-message-insight {
   font-size: 10px;
   font-weight: bold;
   display: inline-block;
   border: 1px solid;
-  padding: 2px;
+  padding: 1px;
   color: white;
-  background-color: #ff0e1d;
+  background-color: #d61720;
 }

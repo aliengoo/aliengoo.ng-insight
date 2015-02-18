@@ -1,6 +1,6 @@
 # ng-insight
 
-# Sorry, this has some pretty serious issues, best avoided at the moment.
+# Work in progress, there are still, potentially, some issues with multiple MutationObservers
 
 ## ng-model-insight
 
