@@ -19,7 +19,7 @@ $modelValueTextColor : white;
 $scopeColor : #a2126f;
 $scopeTextColor : white;
 
-$debugFontFamily: Consolas, inherit;
+$debugFontFamily: inherit;
 
 @mixin indicator($indicatorType, $backgroundColor, $textColor){
 

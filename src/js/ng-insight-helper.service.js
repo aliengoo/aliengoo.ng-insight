@@ -3,10 +3,14 @@
 
   angular.module('aliengoo.ng-insight').factory('helperService', helperService);
 
+  let nodeListToArray = (nodeList) => {
+    return Array.prototype.slice.call(nodeList);
+  };
+
   function helperService() {
     var exports = {
-      walkModelNodes : walkModelNodes,
-      containsNodeType : containsNodeType
+      walkModelNodes: walkModelNodes,
+      containsNodeType: containsNodeType
     };
 
     return exports;
@@ -35,27 +39,11 @@
 
       let signalInterestingChange = false;
 
-      for(let i = 0; i < mutationRecords.length; i++){
-        var mutationRecord = mutationRecords[i];
+      for (let mr of mutationRecords) {
+        let allNodes = nodeListToArray(mr.removedNodes).concat(...nodeListToArray(mr.addedNodes));
 
-        let allNodes = [];
-
-        if (mutationRecord.removedNodes && mutationRecord.removedNodes.length){
-          for(let i = 0; i < mutationRecord.removedNodes.length; i++){
-            allNodes.push(mutationRecord.removedNodes[i])
-          }
-        }
-
-        if (mutationRecord.addedNodes && mutationRecord.addedNodes.length){
-          for(let i = 0; i < mutationRecord.addedNodes.length; i++){
-            allNodes.push(mutationRecord.addedNodes[i])
-          }
-        }
-
-        for(let j = 0; j < allNodes.length; j++){
-          let childNode = allNodes[i];
-
-          if(childNode && walk(childNode)){
+        for (let childNode of allNodes) {
+          if (childNode && walk(childNode)) {
             signalInterestingChange = true;
             break;
             break;
@@ -79,25 +67,22 @@
       });
 
       while (treeWalker.nextNode()) {
-        var ngEl = angular.element(treeWalker.currentNode);
-        var ngModel = ngEl.controller('ngModel');
+        let ngEl = angular.element(treeWalker.currentNode);
+        let nodeData = {
+          ngElement: ngEl,
+          ngElementName: ngEl.attr("name"),
+          ngModelBinding: ngEl.attr('ng-model'),
+          ngModel: ngEl.controller('ngModel'),
+          scope: ngEl.scope()
+        };
 
-        if (!ngModel) {
-          return {
-            error : 'No ng-model available'
-          };
+        if (!nodeData.ngModel) {
+          onNode({
+            error: 'No ng-model available'
+          });
         }
 
-        var elementName = ngEl.attr("name");
-        var childScope = ngEl.scope();
-
-        onNode({
-          ngElement : ngEl,
-          ngElementName : elementName,
-          ngModelBinding : ngEl.attr('ng-model'),
-          ngModel : ngModel,
-          scope : childScope
-        });
+        onNode(nodeData);
       }
     }
   }

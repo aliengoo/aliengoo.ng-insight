@@ -1,7 +1,7 @@
 .ng-model-insight {
   font-size: 10px; }
   .ng-model-insight .indicator.scope {
-    font-family: Consolas, inherit;
+    font-family: inherit;
     font-weight: bold;
     display: inline-block;
     border: 1px solid #a2126f;
@@ -10,7 +10,7 @@
     background-color: #a2126f;
     color: white; }
   .ng-model-insight .indicator.dirty {
-    font-family: Consolas, inherit;
+    font-family: inherit;
     font-weight: bold;
     display: inline-block;
     border: 1px solid #73481c;
@@ -19,7 +19,7 @@
     background-color: #73481c;
     color: white; }
   .ng-model-insight .indicator.pristine {
-    font-family: Consolas, inherit;
+    font-family: inherit;
     font-weight: bold;
     display: inline-block;
     border: 1px solid #249bd5;
@@ -28,7 +28,7 @@
     background-color: #249bd5;
     color: white; }
   .ng-model-insight .indicator.valid {
-    font-family: Consolas, inherit;
+    font-family: inherit;
     font-weight: bold;
     display: inline-block;
     border: 1px solid #408037;
@@ -37,7 +37,7 @@
     background-color: #408037;
     color: white; }
   .ng-model-insight .indicator.invalid {
-    font-family: Consolas, inherit;
+    font-family: inherit;
     font-weight: bold;
     display: inline-block;
     border: 1px solid #d61720;
@@ -46,7 +46,7 @@
     background-color: #d61720;
     color: white; }
   .ng-model-insight .indicator.error {
-    font-family: Consolas, inherit;
+    font-family: inherit;
     font-weight: bold;
     display: inline-block;
     border: 1px solid #d61720;
@@ -55,7 +55,7 @@
     background-color: #d61720;
     color: white; }
   .ng-model-insight .indicator.view-value {
-    font-family: Consolas, inherit;
+    font-family: inherit;
     font-weight: bold;
     display: inline-block;
     border: 1px solid #c767d1;
@@ -64,7 +64,7 @@
     background-color: #c767d1;
     color: white; }
   .ng-model-insight .indicator.model-value {
-    font-family: Consolas, inherit;
+    font-family: inherit;
     font-weight: bold;
     display: inline-block;
     border: 1px solid #6d896a;

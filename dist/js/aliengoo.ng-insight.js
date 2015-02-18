@@ -1,5 +1,7 @@
 "use strict";
 
+var _toConsumableArray = function (arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i]; return arr2; } else { return Array.from(arr); } };
+
 (function () {
   "use strict";
 
@@ -125,6 +127,10 @@
 
   angular.module("aliengoo.ng-insight").factory("helperService", helperService);
 
+  var nodeListToArray = function (nodeList) {
+    return Array.prototype.slice.call(nodeList);
+  };
+
   function helperService() {
     var exports = {
       walkModelNodes: walkModelNodes,
@@ -162,26 +168,13 @@
 
       var signalInterestingChange = false;
 
-      for (var i = 0; i < mutationRecords.length; i++) {
-        var mutationRecord = mutationRecords[i];
+      for (var _iterator = mutationRecords[Symbol.iterator](), _step; !(_step = _iterator.next()).done;) {
+        var _nodeListToArray;
+        var mr = _step.value;
+        var allNodes = (_nodeListToArray = nodeListToArray(mr.removedNodes)).concat.apply(_nodeListToArray, _toConsumableArray(nodeListToArray(mr.addedNodes)));
 
-        var allNodes = [];
-
-        if (mutationRecord.removedNodes && mutationRecord.removedNodes.length) {
-          for (var _i = 0; _i < mutationRecord.removedNodes.length; _i++) {
-            allNodes.push(mutationRecord.removedNodes[_i]);
-          }
-        }
-
-        if (mutationRecord.addedNodes && mutationRecord.addedNodes.length) {
-          for (var _i2 = 0; _i2 < mutationRecord.addedNodes.length; _i2++) {
-            allNodes.push(mutationRecord.addedNodes[_i2]);
-          }
-        }
-
-        for (var j = 0; j < allNodes.length; j++) {
-          var childNode = allNodes[i];
-
+        for (var _iterator2 = allNodes[Symbol.iterator](), _step2; !(_step2 = _iterator2.next()).done;) {
+          var childNode = _step2.value;
           if (childNode && walk(childNode)) {
             signalInterestingChange = true;
             break;
@@ -207,24 +200,21 @@
 
       while (treeWalker.nextNode()) {
         var ngEl = angular.element(treeWalker.currentNode);
-        var ngModel = ngEl.controller("ngModel");
+        var nodeData = {
+          ngElement: ngEl,
+          ngElementName: ngEl.attr("name"),
+          ngModelBinding: ngEl.attr("ng-model"),
+          ngModel: ngEl.controller("ngModel"),
+          scope: ngEl.scope()
+        };
 
-        if (!ngModel) {
-          return {
+        if (!nodeData.ngModel) {
+          onNode({
             error: "No ng-model available"
-          };
+          });
         }
 
-        var elementName = ngEl.attr("name");
-        var childScope = ngEl.scope();
-
-        onNode({
-          ngElement: ngEl,
-          ngElementName: elementName,
-          ngModelBinding: ngEl.attr("ng-model"),
-          ngModel: ngModel,
-          scope: childScope
-        });
+        onNode(nodeData);
       }
     }
   }
