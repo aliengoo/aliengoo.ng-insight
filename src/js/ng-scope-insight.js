@@ -13,6 +13,10 @@
 
     function link(scope, element) {
 
+      if (!element.length) {
+        return;
+      }
+
       if (angular.isUndefined($)) {
         console.error('aliengoo.ng-insight requires jQuery!');
         return;
