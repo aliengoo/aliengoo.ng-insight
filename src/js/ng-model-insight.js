@@ -37,7 +37,6 @@
 
       var observer = new MutationObserver((mutationRecords) => {
         if (helperService.containsNodeType(mutationRecords, "INPUT", "SELECT", "TEXTAREA")) {
-          $log.debug('walking for ng-model-insight');
           walk();
         }
       });

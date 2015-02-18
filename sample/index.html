@@ -24,7 +24,7 @@
       <div class="form-group">
         <label for="firstName">First name</label>
         <input type="text" ng-model="vm.person.firstName" class="form-control" required id="firstName" name="firstName"
-               minlength="5" maxlength="50"/>
+               minlength="5" maxlength="50" ng-walk-scope=""/>
       </div>
 
 
@@ -32,7 +32,7 @@
       <div class="form-group" ng-if="vm.showMiddleNames">
         <label for="middleNames">Middle names</label>
         <input type="text" ng-model="vm.person.middleNames" class="form-control" required id="middleNames" name="middleNames"
-               minlength="5" maxlength="50"/>
+               minlength="5" maxlength="50" ng-walk-scope=""/>
       </div>
 
       <button class="btn btn-primary" ng-click="vm.showMiddleNames = !vm.showMiddleNames">Button state</button>

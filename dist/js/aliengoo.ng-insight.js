@@ -257,7 +257,6 @@ var _toConsumableArray = function (arr) { if (Array.isArray(arr)) { for (var i =
 
       var observer = new MutationObserver(function (mutationRecords) {
         if (helperService.containsNodeType(mutationRecords, "INPUT", "SELECT", "TEXTAREA")) {
-          $log.debug("walking for ng-model-insight");
           walk();
         }
       });
@@ -324,4 +323,62 @@ var _toConsumableArray = function (arr) { if (Array.isArray(arr)) { for (var i =
     }
   }
   ngModelInsight.$inject = ["$compile", "$timeout", "$log", "helperService"];
+})();
+
+(function () {
+  "use strict";
+
+  angular.module("aliengoo.ng-insight").directive("ngWalkScope", ngWalkScope);
+
+  function ngWalkScope() {
+    var exports = {
+      restrict: "A",
+      link: link,
+      scope: false
+    };
+
+    return exports;
+
+    function link(scope, element, attribute) {
+      var upChain = [];
+      var downChain = [];
+
+      function walkUp(s, chain) {
+        if (s.$parent) {
+          walkUp(s.$parent, chain);
+        }
+
+        chain.push(s.$id);
+      }
+
+      function walkDown(s, chain) {
+        if (s.$$ChildScope) {
+          walkDown(s, chain);
+        }
+
+        chain.push(s.$id);
+      }
+
+      walkUp(scope, upChain);
+      walkDown(scope, downChain);
+
+      var set = new Set(upChain.concat.apply(upChain, downChain));
+
+      var temp = "";
+
+      set.forEach(function (x) {
+        if (x) {
+          var scopeCss = "scope";
+          if (scope.$id === x) {
+            scopeCss = "current-scope";
+          }
+          temp += "<span class='indicator " + scopeCss + "'>&lt;$" + x + "</span>";
+        }
+      });
+
+      var html = "<div class='ng-walk-scope'>" + temp + "</div>";
+
+      element.after(html);
+    }
+  }
 })();

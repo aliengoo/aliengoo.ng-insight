@@ -16,7 +16,8 @@ $viewValueTextColor : white;
 $modelValueColor : #6d896a;
 $modelValueTextColor : white;
 
-$scopeColor : #a2126f;
+$scopeColor : #e4149e;
+$currentScopeColor : #a2126f;
 $scopeTextColor : white;
 
 $debugFontFamily: inherit;
@@ -47,6 +48,11 @@ $debugFontFamily: inherit;
   @include indicator('error', $invalidColor, $invalidTextColor);
   @include indicator('view-value', $viewValueColor, $viewValueTextColor);
   @include indicator('model-value', $modelValueColor, $modelValueTextColor);
+}
+.ng-walk-scope {
+  font-size : 10px;
+  @include indicator('scope', $scopeColor, $scopeTextColor);
+  @include indicator('current-scope', $currentScopeColor, $scopeTextColor);
 }
 
 .ng-auto-message-insight {
