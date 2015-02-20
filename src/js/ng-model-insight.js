@@ -65,15 +65,16 @@
         return;
       }
 
-      var name = `ngModelInsight_${childNode.ngElementName.replace(/\./g, "_")}`;
+      let name = `ngModelInsight_${childNode.ngElementName.replace(/\./g, "_")}`;
 
-      var selector = `[name="${name}"]`;
+      let selector = `[name="${name}"]`;
       childNode.scope[name] = childNode.ngModel;
 
-      var modelStateElement = $(selector);
+      let modelStateElement = $(selector);
       if (modelStateElement.length === 0) {
         let html = `
           <span class='indicator scope'>$${childNode.scope.$id}</span>
+          <span class='indicator binding'>${childNode.ngModelBinding}</span>
           <span class='indicator' ng-class='{"dirty" : ${name}.$dirty}' ng-show='${name}.$dirty'>Dirty</span>
           <span class='indicator' ng-class='{"pristine" : ${name}.$pristine}' ng-show='${name}.$pristine'>Pristine</span>
           <span class='indicator' ng-class='{"valid" : ${name}.$valid}' ng-show='${name}.$valid'>Valid</span>
@@ -96,7 +97,7 @@
 
       function build() {
         observer.disconnect();
-        var errorsHtml = '';
+        let errorsHtml = '';
 
         angular.forEach(Object.keys(childNode.scope[name].$error || {}), function (e) {
           errorsHtml += `<span class='indicator error'><em>${e}</em></span>`;

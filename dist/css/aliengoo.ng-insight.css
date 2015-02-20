@@ -9,6 +9,15 @@
     padding: 1px;
     background-color: #e4149e;
     color: white; }
+  .ng-model-insight .indicator.binding {
+    font-family: inherit;
+    font-weight: bold;
+    display: inline-block;
+    border: 1px solid #9b8be4;
+    margin-top: 1px;
+    padding: 1px;
+    background-color: #9b8be4;
+    color: white; }
   .ng-model-insight .indicator.dirty {
     font-family: inherit;
     font-weight: bold;

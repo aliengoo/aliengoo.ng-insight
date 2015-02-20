@@ -20,6 +20,9 @@ $scopeColor : #e4149e;
 $currentScopeColor : #a2126f;
 $scopeTextColor : white;
 
+$bindingColor : #9b8be4;
+$bindingTextColor : white;
+
 $debugFontFamily: inherit;
 
 @mixin indicator($indicatorType, $backgroundColor, $textColor){
@@ -41,6 +44,7 @@ $debugFontFamily: inherit;
 .ng-model-insight {
   font-size : 10px;
   @include indicator('scope', $scopeColor, $scopeTextColor);
+  @include indicator('binding', $bindingColor, $bindingTextColor);
   @include indicator('dirty', $dirtyColor, $dirtyTextColor);
   @include indicator('pristine', $pristineColor, $pristineTextColor);
   @include indicator('valid', $validColor, $validTextColor);
